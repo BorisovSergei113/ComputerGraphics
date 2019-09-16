@@ -1,0 +1,46 @@
+<HTML>
+<BODY>
+  <canvas id = 'lab2' width='500' height='500' style="border:1px solid" >
+  </canvas>
+  <canvas id = 'lab2_c' width='500' height='500' style="border:1px solid" >
+  </canvas>
+  <script>
+  var canvas = document.getElementById('lab2');
+  var ctx = canvas.getContext('2d');
+
+  ctx.fillRect(10, 10, 10, 10);
+  var img = new Image();
+
+  img.setAttribute('crossorigin','anonymous');
+
+  img.onload = function() {
+    var canvas_c = document.getElementById('lab2_c');
+    var ctx_c = canvas_c.getContext('2d');
+    var idata_c = ctx_c.createImageData(canvas_c.width, canvas_c.height);
+
+   ctx.drawImage(img, 0, 0);
+   var idata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+   console.log(idata);
+   for(let i=0; i<canvas.width; i++){
+     for(let j=0; j<canvas.height; j++){
+       var r = idata.data[(i*canvas.width+j)*4];
+       var g = idata.data[(i*canvas.width+j)*4+1];
+       var b = idata.data[(i*canvas.width+j)*4+2];
+       var s = idata.data[(i*canvas.width+j)*4+3];
+       if(idata.data[(i*canvas.width+j)*4+3] != 0){
+          //console.log(r+" "+g+" "+b+" "+s+" ");
+          //ctx_c.fillRect(j, i, 1, 1);
+          //ctx_c.idata_c[(i*canvas_c.width+j)*4] = 1;
+           idata_c[(i*canvas_c.width+j)*4] = r;
+           idata_c[(i*canvas_c.width+j)*4+1] = g;
+           idata_c[(i*canvas_c.width+j)*4+2] = b;
+           idata_c[(i*canvas_c.width+j)*4+3] = s;
+     }
+   }
+}
+ctx_c.putImageData(idata, 0, 0);
+}
+  img.src = "http://i.imgur.com/nif7ztU.jpg";
+  </script>
+</BODY>
+</HTML>
