@@ -1,0 +1,40 @@
+<HTML>
+ <BODY>
+ 	<canvas id='lab03' width='500' height="500" style="border:1px solid"> </canvas>
+ 		<script>
+ 			var canvas = document.getElementById('lab03');
+ 			var ctx = canvas.getContext('2d');
+            var x0 = 12;
+            var y0 = 5;
+            var x1 = 350;
+            var y1 = 250;
+            var eps = 0;
+            var y = y0;
+            var flag = 0;
+
+  document.addEventListener("click", function(event){
+  if(event.which == 1){
+    if(flag == 0){
+      x0 = event.offsetX;
+      y0 = event.offsetY;
+      flag = 1;
+    } 
+    else if (flag == 1) {
+      x1 = event.offsetX;
+      y1 = event.offsetY;
+      for (var x = x0; x < (x1 - x0); x++) {
+            	ctx.fillRect(x, y, 1, 1);
+            	eps += 2*(y1 - y0);
+            	if (eps > (x1 - x0)) { y++ ; eps = eps - 2*(x1 - x0); }
+            }
+      flag = 0;
+       x0 = 0;
+       y0 = 0;
+       eps = 0;
+       y = y0;
+    }
+  }
+  });
+ 		</script>
+ </BODY>
+</HTML>
