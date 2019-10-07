@@ -1,0 +1,91 @@
+<HTML>
+<BODY>
+  <canvas id = 'lab2' width='500' height='500' style="border:1px solid" > </canvas>
+  <canvas id = 'lab2_c' width='500' height='500' style="border:1px solid" > </canvas>
+  <script>
+  var canvas = document.getElementById('lab2');
+  var ctx = canvas.getContext('2d');
+
+
+  var img = new Image();
+
+  img.setAttribute('crossorigin','anonymous');
+
+  img.onload = function() {
+    var canvas_c = document.getElementById('lab2_c');
+    var ctx_c = canvas_c.getContext('2d');
+
+    ctx.drawImage(img, 0, 0);
+    var idata = ctx.getImageData(0, 0, img.width, img.height);
+
+    var kernelX = [[-1, 0, 1],
+                   [-2, 0, 2],
+                   [-1, 0, 1]];
+
+    var kernelY = [[-1, -2, -1],
+                   [ 0, 0, 0],
+                   [1, 2, 1]];
+
+                    var green_y = 0;
+                    var blue_y = 0;
+                    var red_y = 0;
+                    var red_x = 0;
+                    var green_x = 0;
+                    var blue_x = 0;
+                    var r = 0;
+                    var g = 0;
+                    var b = 0;
+function UseSobelFilter(idata){
+    var idata_c = ctx_c.createImageData(canvas_c.width, canvas_c.height);
+    for (var i = 0; i <canvas.width; i++) {
+          for (var j = 0; j < canvas.height; j++) {
+          	         green_y = 0;
+                     blue_y = 0;
+                     red_y = 0;
+                     red_x = 0;
+                     green_x = 0;
+                     blue_x = 0;
+                     red = 0;
+                     green = 0;
+                     blue = 0;
+          	for (var ir=0; ir < 3;ir++){
+                        for (var  jr=0; jr < 3;jr++){
+                            red_y += kernelY[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4];
+                            green_y += kernelY[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4 + 1];
+                            blue_y += kernelY[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4 + 2];
+
+                        }
+                    }
+                    for (var ir = 0; ir < 3; ir++) {
+                        for (var jr = 0; jr < 3; jr++) {
+                            red_x += kernelX[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4];
+                            green_x += kernelX[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4 + 1];
+                            blue_x += kernelX[ir][jr] * idata.data[(canvas.width * (j + jr - 1) + i + ir - 1) * 4 + 2];
+                        }
+                    }
+                    red = Math.sqrt(red_y * red_y + red_x * red_x);
+                    green = Math.sqrt(green_y * green_y + green_x * green_x);
+                    blue = Math.sqrt(blue_y * blue_y + blue_x * blue_x);
+
+                    red = red > 255 ? 255 : red;
+                    green = green > 255 ? 255 : green;
+                    blue = blue > 255 ? 255 : blue;
+
+                    red = red < 0 ? 0 : red;
+                    green = green < 0 ? 0 : green;
+                    blue = blue < 0 ? 0 : blue;
+
+                    idata_c.data[(j * canvas.width + i) * 4] = red;
+                    idata_c.data[(j * canvas.width + i) * 4 + 1] = green;
+                    idata_c.data[(j * canvas.width + i) * 4 + 2] = blue;
+                    idata_c.data[(j * canvas.width + i) * 4 + 3] = idata.data[(j * canvas.width + i) * 4 + 3];
+          }
+    }
+    return idata_c;
+}
+ctx_c.putImageData(UseSobelFilter(idata), 0, 0);
+};
+  img.src = "http://i.imgur.com/nif7ztU.jpg";
+  </script>
+</BODY>
+</HTML>
