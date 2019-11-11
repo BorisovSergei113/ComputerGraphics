@@ -1,0 +1,205 @@
+<HTML>
+<BODY>
+	<canvas id='lab05' height='500' width='500' style="border:1px solid"> </canvas>
+	<div class = "buttons">
+		<button type="button" id="firstButton" onclick="lineFunction()">Line </button>  
+		<button type="button" id="secondButton" onclick="rectFunction()">Rectangle </button> 
+		<button type="button" id="secondButton" onclick="drawFunction()">Draw </button>  		
+	</div>
+	<div>
+		<h1>Rectangle - Points for rectangle </h1>
+		<h1>Draw & click on draw zone - отсечение линий в рамках нарисованного многоугольника</h1>
+	</div>	
+<script>
+	var canvas = document.getElementById('lab05');
+	var ctx = canvas.getContext('2d');
+
+	var buf=[];
+	var PointsRectangle=[];
+	var countbuf = 0;
+	var countPointsRect = 0;    
+
+	        var x0 = 0;
+            var y0 = 0;
+            var x1 = 0;
+            var y1 = 0;
+            var dx, dy, sx, sy, err;
+            var flag = 0;   
+ 
+	function drawLine(x0, y0, x1, y1) {
+	   dx = Math.abs(x1 - x0); // проекция отрезкаа на ось ОХ
+       dy = Math.abs(y1 - y0); //проекция отрезкаа на ось ОY
+       sx = (x0 < x1) ? 1 : -1; //направление отрисовки отрезка для оси ОХ
+       sy = (y0 < y1) ? 1 : -1; // //направление отрисовки отрезка для оси ОY
+       err = dx - dy; //ошибка
+       // dx = -1|dx = 1
+       // dy = -1|dy = -1
+       // _______|______
+       // dx = -1|dx = 1
+       // dy = 1 |dy = 1
+      while(!((x0 === x1) && (y0 === y1))) {
+      ctx.fillRect(x0, y0, 1, 1);
+      var e2 = 2*err; // *2 для целочисленных вычислений
+      if (e2 > -dy) { err -= dy; x0  += sx; }
+      if (e2 < dx) { err += dx; y0  += sy; }
+   }
+	}
+
+	function getMousePos(canvas) {
+		return {
+			x: event.clientX,
+			y: event.clientY
+		};
+
+	}
+	
+	function SayrusBeckAlgrotihm()
+		{
+			ctx.clearRect(0,0,500,500);
+			var orient = orientation();
+			var tmpBuffer = [];
+			var tmpCount = 0;
+			for(var i = 0; i < buf.length; i+=2)
+			{
+				var t0 = 0
+				var t1 = 1;
+				var flag = true;
+				for(var j = 0; j < PointsRectangle.length; j++)
+				{
+					var n;
+					if(orient == 'anticlockwise')
+					{
+						if(j == PointsRectangle.length - 1) n = normal(PointsRectangle[0],PointsRectangle[j]);
+						else n = normal(PointsRectangle[j+1],PointsRectangle[j]);
+					}
+					else if(orient == 'clockwise')
+					{
+						if(j == PointsRectangle.length - 1) n = normal(PointsRectangle[j],PointsRectangle[0]);
+						else n = normal(PointsRectangle[j],PointsRectangle[j+1]);
+					}
+					else
+					{
+						alert('error');
+						return;
+					}
+					var pn = scalar(delta(buf[i],buf[i+1]),n);
+					var qn = scalar(delta(PointsRectangle[j],buf[i]),n);
+
+					if(pn != 0)
+					{
+						var t = -qn/pn;
+						if(pn < 0){
+							if(t < t1) t1 = t;
+						}
+						else{
+							if(t > t0) t0 = t;
+						}
+					}
+					else if(qn < 0) flag = false;
+				}
+
+				if(t0 > t1) flag = false;
+				if(flag){
+					var tmpBuffer1, tmpBuffer2;
+					tmpBuffer1 = p_s(buf[i],buf[i+1],t0);
+					tmpBuffer2 = p_s(buf[i],buf[i+1],t1);
+					tmpBuffer.push([parseInt(tmpBuffer1[0]),parseInt(tmpBuffer1[1])]);
+					tmpBuffer.push([parseInt(tmpBuffer2[0]),parseInt(tmpBuffer2[1])]);
+					drawLine(parseInt(tmpBuffer1[0]), parseInt(tmpBuffer1[1]), parseInt(tmpBuffer2[0]), parseInt(tmpBuffer2[1]));
+				}
+			}
+				
+				for(var j = 0; j < PointsRectangle.length - 1; j++) {
+					drawLine(PointsRectangle[j][0], PointsRectangle[j][1], PointsRectangle[j+1][0], PointsRectangle[j+1][1]);
+				}
+				drawLine(PointsRectangle[0][0], PointsRectangle[0][1], PointsRectangle[PointsRectangle.length - 1][0], PointsRectangle[PointsRectangle.length - 1][1]);
+			buf = [];
+			buf = tmpBuffer;
+			console.log(buf);
+			tmpBuffer = [];
+			PointsRectangle = [];
+		}
+
+		function orientation() // вычисление направления обхода 
+		{
+			var product = [],
+			count = 0;
+			for(let i = 0; i < PointsRectangle.length - 2; i++){
+				product.push(vector__product(delta(PointsRectangle[i],PointsRectangle[i+1]),delta(PointsRectangle[i],PointsRectangle[i+2])));
+			}
+			product.push(vector__product(delta(PointsRectangle[PointsRectangle.length - 2],PointsRectangle[PointsRectangle.length - 1]),delta(PointsRectangle[PointsRectangle.length - 2],PointsRectangle[0])));
+			product.push(vector__product(delta(PointsRectangle[PointsRectangle.length - 1],PointsRectangle[0]),delta(PointsRectangle[PointsRectangle.length - 1],PointsRectangle[1])));
+			for(let j = 0; j < product.length; j++){
+				if(product[j]<0) count--;
+				else if(product[j]>0) count++; 
+			}
+			if(count == product.length) return 'anticlockwise';
+			else if(count == -product.length) return 'clockwise';
+			else return 'error';
+		}
+
+			function vector__product(pt1,pt2)
+	{
+		return pt1[0]*pt2[1]-pt2[0]*pt1[1];
+	}
+
+	function scalar(pt1,pt2)
+	{
+		return pt1[0]*pt2[0] + pt1[1]*pt2[1];
+	}
+
+	function delta(pt1,pt2)
+	{
+		return [pt2[0]-pt1[0],pt2[1]-pt1[1]];
+	}
+
+	function normal(pt1,pt2)
+	{
+		return [pt2[1]-pt1[1],pt1[0]-pt2[0]];
+	}
+	
+	function p_s(pt1, pt2, t)
+	{
+		return [pt1[0] + t*(pt2[0] - pt1[0]), pt1[1] + t*(pt2[1] - pt1[1])];
+	}
+		
+	var lineListener = function(event) {
+		var mousePos = getMousePos(canvas);
+		buf.push([mousePos.x,mousePos.y]);
+		console.log(buf);
+		if(buf.length % 2 == 0) {
+			drawLine(buf[countbuf][0], buf[countbuf][1], buf[countbuf+1][0], buf[countbuf+1][1]);
+			countbuf += 2;
+			console.log(buf);
+		}
+	}
+	
+	var rectListener = function(event) {
+		var mousePos = getMousePos(canvas);
+		PointsRectangle.push([mousePos.x,mousePos.y]);
+	}
+	
+	var drawListener = function(event) {
+		SayrusBeckAlgrotihm();
+	}
+		
+	
+	function lineFunction() {
+		canvas.removeEventListener('click', rectListener, false);
+		canvas.removeEventListener('click', drawListener, false);
+		canvas.addEventListener('click', lineListener, false);
+	}
+	
+	function rectFunction() {
+		canvas.removeEventListener('click', lineListener, false);
+		canvas.removeEventListener('click', drawListener, false);
+		canvas.addEventListener('click', rectListener, false);
+	}
+	function drawFunction() {
+		canvas.removeEventListener('click', lineListener, false);
+		canvas.removeEventListener('click', rectListener, false);
+		canvas.addEventListener('click', drawListener, false);
+	}
+</script> 
+</BODY> 
+</HTML>
