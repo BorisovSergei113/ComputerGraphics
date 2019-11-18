@@ -1,0 +1,146 @@
+<HTML>
+<BODY>
+    <div class= "canvas">
+        <canvas id='lab06' height='500' width='500' style="border:1px solid"> </canvas>
+    </div>
+    <div class = "buttons"> 
+        <button type="button" id="firstButton" onclick="rectFunc()">Rectangle</button> 
+        <button type="button" id="secondButton" onclick="drawFunc()">Draw</button>          
+    </div>
+    <div>
+        <p>Rectangle - set points for draw rectangle</p>
+        <p>Choice color:
+        <select id = "color">
+        <option value ="red">red</option>
+        <option value = "green">green</option>
+        <option value= "black">black</option>
+        <option value= "blue">blue</option>
+        </select> 
+        </p> 
+        <p>Draw - Click on button and area for fill color this rectangle</p> 
+    </div>
+<script>
+    var canvas = document.getElementById('lab06');
+    var ctx = canvas.getContext('2d');
+    var buffer=[];
+    
+    function getMousePos(canvas) {
+        return {
+            x: event.clientX - 3,
+            y: event.clientY - 3
+        };
+    }
+        var rectListener = function(event) {
+        var mousePos = getMousePos(canvas);
+        buffer.push([mousePos.x,mousePos.y]);
+    }
+
+    var drawListener = function(event) {
+        var tmpBuffer = [];
+        tmpBuffer = buffer;
+        for(var j = 0; j < tmpBuffer.length; j++) {
+            if(j == tmpBuffer.length - 1){
+                tmpBuffer = buffer;
+                drawLine(tmpBuffer[j], tmpBuffer[0]);
+            }
+            else {tmpBuffer = buffer; drawLine(tmpBuffer[j], tmpBuffer[j+1]);}
+        }
+        fillFigure();
+        buffer = [];
+    }
+
+    function drawLine(point1, point2)
+    {
+        ctx.beginPath()
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = document.getElementById('color').value;
+        ctx.moveTo(point1[0], point1[1]);
+        ctx.lineTo(point2[0], point2[1]);
+        ctx.stroke();
+    }
+    
+    function fillFigure()
+    {
+        buffer = rastFigure();
+        for(var i = 0; i < buffer.length - 2; i++)
+        {
+            if(buffer[i][1] == buffer[i+2][1] && buffer[i][1] != buffer[i+3][1]){
+                drawLine(buffer[i],buffer[i+2]);
+                i+=2;
+            }
+            else if(buffer[i][1] == buffer[i+1][1]){
+                drawLine(buffer[i],buffer[i+1]);
+                i++;
+            }
+        }
+    }
+        function oneLine(point1, point2)
+        {
+            if(point1[1] == point2[1]){return true;}  
+            return false;
+        }
+        function rastFigure()
+        {
+            var poly = [];
+            for(var i = 0; i < buffer.length - 1; i++)
+            {
+                if(!oneLine(buffer[i],buffer[i+1])){
+                    poly = poly.concat(restLine(buffer[i],buffer[i+1]));
+                }
+                else {poly.push(buffer[i]);}
+            }
+            if(!oneLine(buffer[buffer.length - 1], buffer[0]))
+            {
+                poly = poly.concat(restLine(buffer[buffer.length - 1], buffer[0]));
+            }
+            return poly.sort(sortFunc);
+        }
+
+        function restLine(point1, point2)
+        {
+            var y = point1[1],
+            dx = (point2[0] - point1[0])/(point2[1] - point1[1]),
+            x = point1[0],
+            poly = [];
+            if(point1[1] < point2[1]){
+                while(y <= point2[1]){
+                    poly.push([x,y]);
+                    y++;
+                    x += dx;
+                }
+            }
+            else{
+                while(y >= point2[1]){
+                    poly.push([x,y]);
+                    y--;
+                    x -= dx;
+                }
+            }
+            return poly;
+        }
+
+        function sortFunc(point1,point2)
+        {
+            if(point1[1] > point2[1]) return 1;
+            if(point1[1] < point2[1]) return -1;
+            if(point1[1] == point2[1])
+            {
+                if(point1[0] > point2[0]) return 1;
+                if(point1[0] < point2[0]) return -1;
+                if(point1[0] == point2[0]) return 0;
+            }
+        }
+
+    function rectFunc() {
+        ctx.clearRect(0,0,500,500);
+        canvas.addEventListener('click', rectListener, false);
+    }
+    function drawFunc() {
+        canvas.removeEventListener('click', rectListener, false);
+        if (buffer.length != 0) {
+                drawListener();
+            }
+    }
+</script> 
+</BODY> 
+</HTML>
