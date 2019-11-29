@@ -1,0 +1,74 @@
+<html>
+<head/>
+<body>
+<canvas id='lab07' width='500' height='500' style="border:1px solid"> </canvas>
+<p>Rotate figure right</p>
+<input type="Angle" id="angle"/>
+<input type="button" id="btn" value="Rotate">
+<script>
+	var canvas=document.getElementById('lab07');
+	var ctx = canvas.getContext('2d');
+	window.onload = function() {
+    figure = [{
+            'x': 10,
+            'y': 80
+        }, {
+            'x': 50,
+            'y': 160
+        }, {
+            'x': 90,
+            'y': 80
+        }, {
+            'x': 50,
+            'y': 130
+        }, 
+        ];
+    center = {
+        'x': 50,
+        'y': 160
+    }
+    drawFigure();
+    move(200,100);
+}
+function drawFigure() {
+    ctx.fillStyle = '#00a86b';
+    ctx.beginPath();
+    ctx.moveTo(figure[0].x,figure[0].y);
+    for(var d in figure){
+        ctx.lineTo(figure[d].x,figure[d].y);
+    }
+    ctx.closePath();
+    ctx.fill();
+}
+ 
+function move(x, y) {
+    ctx.clearRect( 0 , 0 , 500 , 500 );
+ 
+    for(var d in figure){
+        figure[d].x += x;
+        figure[d].y += y;
+    }
+    center.x += x;
+    center.y += y;
+    drawFigure();
+ 
+}
+
+function turn(angle) {
+    angle = (angle * 3.14)/180; //to radian
+    ctx.clearRect( 0 , 0 , 500 , 500);
+    for(var d in figure){
+        temp = figure[d].x-center.x;
+        figure[d].x = parseInt( (figure[d].x-center.x) * Math.cos(angle) - (figure[d].y - center.y)*Math.sin(angle)) + center.x;
+        figure[d].y = parseInt( temp * Math.sin(angle) + (figure[d].y - center.y)*Math.cos(angle) ) + center.y;
+        console.log(figure[d].x, figure[d].y);
+    }
+    drawFigure();
+}
+//document.addEventListener("click", function(event){turn(90)});
+var but = document.getElementById("btn");
+but.addEventListener("click", function(event){turn(document.getElementById("angle").value)});
+// document.getElementById("btn").onclick = turn(document.getElementById("angle").value);
+</script>
+</body>
+</html>
