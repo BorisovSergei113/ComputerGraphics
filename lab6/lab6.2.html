@@ -1,0 +1,98 @@
+<HTML>
+<BODY>
+    <div class= "canvas">
+        <canvas id='lab06.1' height='500' width='500' style="border:1px solid"> </canvas>
+    </div>
+    <div>
+        <p>Choice color:
+        <select id = "color">
+        <option value ="red">red</option>
+        <option value = "green">green</option>
+        <option value= "black">black</option>
+        <option value= "blue">blue</option>
+        </select>
+        </p>
+    </div>
+<script>
+    var canvas = document.getElementById('lab06.1');
+    var ctx = canvas.getContext('2d');
+    	function drawLine(ctx, x0, y0, x1, y1) {
+            var dy = Math.abs(y1-y0);
+    		var dx = Math.abs(x1-x0);
+    		var dmax = Math.max(dx, dy);
+    		var dmin = Math.min(dx, dy);
+    		var xdir = 1;
+    		if (x1<x0) xdir = -1;
+    		var ydir = 1;
+    		if (y1<y0) ydir = -1;
+    		var eps = 0;
+    		var s = 1;
+    		var k=2*dmin;
+    		if (dy<=dx) {
+    			var y = y0;
+    			for (var x=x0; x*xdir<=x1*xdir; x+=xdir) {
+    				ctx.fillRect(x*s, y*s, 1*s, 1*s);
+    				eps = eps+k;
+    				if (eps>dmax) {
+    					y+=ydir;
+    					eps = eps - 2*dmax;
+    				}
+    			}
+    		} else {
+    			var x = x0;
+    			for (var y=y0; y*ydir<=y1*ydir; y+=ydir) {
+    				ctx.fillRect(x*s, y*s, 1*s, 1*s);
+    				eps = eps+k;
+    				if (eps>dmax) {
+    					x+=xdir;
+    					eps = eps - 2*dmax;
+    				}
+    			}
+    		}
+         }
+
+    	function fillArea(ctx, x, y) {
+    		if (ctx.getImageData(x, y, 1, 1).data[3] != 255) {
+    			ctx.fillRect(x, y, 1, 1);
+    			fillArea(ctx, x-1, y);
+    			fillArea(ctx, x, y+1);
+    			fillArea(ctx, x, y-1);
+    			fillArea(ctx, x+1, y);
+    		} else return;
+    	}
+
+    	var figure = new Array();
+    	var points = 0;
+    	var flag = false;
+
+    	canvas.addEventListener('click', function(event) {
+            ctx.fillStyle = document.getElementById('color').value;
+    		if (flag)
+    		{
+    			fillArea(ctx, event.offsetX, event.offsetY);
+    		}
+    		else
+    		{
+    			figure[2*points] = event.offsetX;
+    			figure[2*points+1]= event.offsetY;
+    			if (points!=0)
+    			{
+    				drawLine(ctx,figure[2*points], figure[2*points+1],
+    				figure[2*points-2], figure[2*points-1]);
+    			}
+    			points++;
+    		}
+    	});
+
+    	canvas.oncontextmenu = function() {
+    		if (points > 1)
+    		{
+    			drawLine(ctx,figure[2*points-2], figure[2*points-1], figure[0], figure[1]);
+    		}
+    		flag = true;
+    		return false;
+    	}
+
+</script>
+</BODY>
+</HTML>
